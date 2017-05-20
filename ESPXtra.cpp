@@ -1,4 +1,4 @@
-#include <ESPCoolStuff.h>
+#include <ESPXtra.h>
 
 #define COOL_KEY_BEGIN 0x42454749
 #define COOL_KEY_END 0x454E4421
@@ -11,11 +11,11 @@ typedef struct RtcData_t
   uint32_t keyEnd;
 };
 
-ESPCoolStuff::ESPCoolStuff()
+ESPXtra::ESPXtra()
 {
 }
 
-int ESPCoolStuff::SleepCheck()
+int ESPXtra::SleepCheck()
 {
   RtcData_t rtcData;
   if (ESP.rtcUserMemoryRead(0, (uint32_t *)&rtcData, sizeof(RtcData_t)))
@@ -44,7 +44,7 @@ int ESPCoolStuff::SleepCheck()
   return 1;
 }
 
-void ESPCoolStuff::SleepSetMinutes(uint32_t sleepMinutes)
+void ESPXtra::SleepSetMinutes(uint32_t sleepMinutes)
 {
   RtcData_t rtcData;
   rtcData.hours = sleepMinutes / min_per_h;
@@ -80,4 +80,23 @@ void ESPCoolStuff::SleepSetMinutes(uint32_t sleepMinutes)
                 rtcData.hours ? WAKE_RF_DISABLED : WAKE_RF_DEFAULT);
 }
 
-///////// Private functions ///////////////////
+int ESPXtra::ButtonPressed(int pin, int off_state)
+{
+  static int _pin = -1;
+  static unsigned long start_press = 0;
+  int pin_state = digitalRead(pin);
+
+  if (pin_state == off_state) {
+    _pin = -1;
+    return 0;    
+  }
+  if (pin != _pin) {
+    _pin = pin;
+    start_press = millis();
+    return 1;
+  }
+  if (millis() > start_press + 10UL*1000UL) {
+    return 2;
+  }
+  return 1;
+}

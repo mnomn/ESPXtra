@@ -1,5 +1,5 @@
-#ifndef ESPCOOLCONF_H
-#define ESPCOOLCONF_H
+#ifndef ESPXTRA_H
+#define ESPXTRA_H
 
 /*
  * Varous useful helper functions for ESP 8266.
@@ -9,12 +9,12 @@
 
 #include <Arduino.h>
 
-class ESPCoolStuff
+class ESPXtra
 {
   public:
     /*  Create ESPConfig object. This class uses the RTC memory,
         so do not mess with that.*/
-    ESPCoolStuff();
+    ESPXtra();
 
     /* Check if device shall go back to sleep.
        Typically this function shall be called in setup().
@@ -32,6 +32,16 @@ class ESPCoolStuff
     */
     void SleepSetMinutes(uint32_t minutes);
 
+    /* Check if a button is not pressed, pressed, longn presssed.
+       Only one button at the time can be checked for long press.
+       pin: Which rpio pin that shall be pressed
+       off_state (optional, default HIGH). Set LOW if pin is normally low.
+       Returns 0: Not pressed
+               1: Pressed
+               2: Long pressed (10 sec)
+    */
+    int ButtonPressed(int pin, int off_state = HIGH);
+
   private:
 };
-#endif // ESPCOOLCONF_H
+#endif // ESPXTRA_H
