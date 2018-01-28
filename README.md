@@ -13,5 +13,11 @@ In the setup() function (for example), call `espx.SleepCheck();` and the device 
 A small resistor (220 ohm) between GPIO 16 and RESET will make both flashing and wakeup work. (don't know why, trial and error + googling)
 
 ## ButtonPressed
+Call `p = ButtonPressed(pin)` to detect a button press. p is number of seconds pressed (min 1), so it can be used to detect long press.
 
-Call `p = ButtonPressed(pin)` to detect a button press (p == 1) or a button long press (p == 2).
+## PostJson
+Post up to 5 values in json format to a url.
+```
+PostJson("192.168.0.12", 8080, NULL, "value1", 34.56);
+PostJson("www.example.com", 80, "secret-key:1234", "value1", 34.56, "value2", 98.65);
+```
