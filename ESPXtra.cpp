@@ -5,7 +5,7 @@
 #define COOL_KEY_END 0x454E4421
 
 #define min_per_h 60
-typedef struct RtcData_t
+struct RtcData_t
 {
   uint32_t keyBegin;
   uint32_t hours;
@@ -24,8 +24,6 @@ int ESPXtra::PostJson(char * url, int port, char *header,
                       char *name5, float val5)
 {
   String jdata;
-  int pos = 0;
-
   WiFiClient client;
   // Remove schema:// from url
 
@@ -78,7 +76,7 @@ int ESPXtra::PostJson(char * url, int port, char *header,
     headerData += " HTTP/1.1\r\nHost: ";
     headerData += url;
     headerData += "\r\nContent-Type: application/json\r\n";
-    if (header > 0)
+    if (header)
     {
       headerData += header;
       headerData += "\r\n";
@@ -129,7 +127,7 @@ int ESPXtra::SleepCheck()
       ESP.rtcUserMemoryWrite(0, (uint32_t *)&rtcData, sizeof(RtcData_t));
       
       Serial.println("Go back to sleep");
-      ESP.deepSleep(min_per_h * 60 * 1000000,
+      ESP.deepSleep(min_per_h * 60UL * 1000000UL,
                     rtcData.hours ? WAKE_RF_DISABLED : WAKE_RF_DEFAULT);
     }
   }
@@ -172,7 +170,7 @@ void ESPXtra::SleepSetMinutes(uint32_t sleepMinutes)
   Serial.print("m, ");
   Serial.print(rtcData.hours);
   Serial.println(" h");
-  ESP.deepSleep(sleepMinutes * 60 * 1000000,
+  ESP.deepSleep(sleepMinutes * 60UL * 1000000UL,
                 rtcData.hours ? WAKE_RF_DISABLED : WAKE_RF_DEFAULT);
 }
 
