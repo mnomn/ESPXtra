@@ -9,6 +9,28 @@
 
 #include <Arduino.h>
 
+#ifndef XTRA_DEBUG
+#define XTRA_DEBUG 0
+#endif
+
+// Enable by defining "XTRA_DEBUG"
+#define XTRA_PRINT(x) do {if(XTRA_DEBUG)Serial.print(x);}while(0)
+#define XTRA_PRINTLN(x) do {if(XTRA_DEBUG)Serial.println(x);}while(0)
+#define XTRA_PRINTF(x,...) do {if(XTRA_DEBUG)Serial.printf(x,__VA_ARGS__);}while(0)
+
+/* Enable by defining "XTRA_DEBUG 2"
+in platform.io:
+build_flags =
+  -DXTRA_DEBUG=2
+*/
+#define XTRA_PRINT2(x) do {if(XTRA_DEBUG>=2)Serial.print(x);}while(0)
+#define XTRA_PRINTLN2(x) do {if(XTRA_DEBUG>=2)Serial.println(x);}while(0)
+#define XTRA_PRINTF2(x,...) do {if(XTRA_DEBUG>=2)Serial.printf(x,__VA_ARGS__);}while(0)
+
+// Enable by defining "XTRA_DEBUG 3"
+#define XTRA_PRINT3(x) do {if(XTRA_DEBUG>=3)Serial.print(x);}while(0)
+#define XTRA_PRINTLN3(x) do {if(XTRA_DEBUG>=3)Serial.println(x);}while(0)
+
 class ESPXtra
 {
   public:
@@ -27,7 +49,7 @@ class ESPXtra
 
     /* Configure Sleep. This function will put the device in sleep.
        If you sleep for more than 60 min, you must call
-       CheckSleepInSetup in setup() function.
+       SleepCheck in the setup() function.
        0 minutes meens forever.
     */
     void SleepSetMinutes(uint32_t minutes);
@@ -41,17 +63,11 @@ class ESPXtra
     */
     int ButtonPressed(int pin, int off_state = HIGH);
 
-    /* Post Json data to a url (without http://),
+    /* Post Json data to a url
        and if needed, add extra header.
-       PostJson("www.example.com", 80, "secret-key:1234", "value1", 34.56, "value2", 98.65);
+       PostJsonString("http://www.example.com:8080/some/path", "secret-key:1234", "{\"val1\":123,\"val2\":321.0}");
        Return 0 on success.
     */
-    int PostJson(char * url, int port, char *header = NULL,
-                 char *name1 = NULL, float val1 = 0,
-                 char *name2 = NULL, float val2 = 0,
-                 char *name3 = NULL, float val3 = 0,
-                 char *name4 = NULL, float val4 = 0,
-                 char *name5 = NULL, float val5 = 0);
-  private:
+    int PostJsonString(const String& url, const char *header, const char *jsonStr);
 };
 #endif // ESPXTRA_H
