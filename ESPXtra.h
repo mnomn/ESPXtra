@@ -34,6 +34,11 @@ build_flags =
 class ESPXtra
 {
   public:
+    static const int ButtonNotPressed = 0;
+    static const int ButtonShort = 1;
+    static const int ButtonMedium = 2;
+    static const int ButtonLong = 3;
+
     /*  Create ESPConfig object. This class uses the RTC memory,
         so do not mess with that.*/
     ESPXtra();
@@ -54,14 +59,15 @@ class ESPXtra
     */
     void SleepSetMinutes(uint32_t minutes);
 
-    /* Check if a button is not pressed, pressed, longn presssed.
-       Only one button at the time can be checked for long press.
-       pin: Which rpio pin that shall be pressed
-       off_state (optional, default HIGH). Set LOW if pin is normally low.
-       Returns Seconds pressed, 0 if not pressed
-
+    /* Check if a button is pressed, short, medium (> 2 sec) or long (> 6 sec) pressed.
+       Optionally blink a led to show when button presed medium (medium blinks) or long (long blinks).
+       Only one button at the time can be checked for longpress.
+       buttonPin: Which gpio pin to check
+       ledPin: Which pin the indicator led is connected to (or -1).
+       releasedState: (optional, default HIGH). Set LOW if pin is normally low.
+       Returns ButtonNotPressed (0), ButtonSort, ButtonMedium, ButtonLong.
     */
-    int ButtonPressed(int pin, int off_state = HIGH);
+    int ButtonPressed(int buttonPin, int ledPin = -1, int releasedState = HIGH);
 
     /* Post Json data to a url
        and if needed, add extra header.

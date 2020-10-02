@@ -106,25 +106,51 @@ void ESPXtra::SleepSetMinutes(uint32_t sleepMinutes)
                 rtcData.hours ? WAKE_RF_DISABLED : WAKE_RF_DEFAULT);
 }
 
-int ESPXtra::ButtonPressed(int pin, int off_state)
+int ESPXtra::ButtonPressed(int buttonPin, int ledPin, int releasedState)
 {
-  static int _pin = -1;
   static unsigned long start_press = 0;
-  int pin_state = digitalRead(pin);
+  int pin_state = digitalRead(buttonPin);
 
-  if (pin_state == off_state) {
-    _pin = -1;
-    return 0;    
+  if (pin_state == releasedState) {
+    if (start_press) {
+      XTRA_PRINTLN("Released button");
+    }
+    start_press = 0;
+    return 0;
   }
+
   unsigned long now = millis();
-  if (pin != _pin) {
-    _pin = pin;
+
+  if (start_press == 0) {
+    XTRA_PRINTF("Pressed button %d\n", buttonPin);
     start_press = now;
-    return 1;
   }
 
-  int ret = now/1000 - start_press/1000;
-  if (ret == 0) ret = 1;
+  unsigned long t = now - start_press;
 
-  return ret;
+  if (t > 6000)
+  {
+    if (ledPin >= 0)
+    {
+      // slow blink
+      digitalWrite(ledPin, (now / 500) & 1);
+    }
+    XTRA_PRINTLN2("Pressed button long");
+    return ButtonLong;
+  }
+
+  if (t > 2000)
+  {
+    if (ledPin >= 0)
+    {
+      // Fast blink
+      digitalWrite(ledPin, (now / 100) & 1);
+    }
+    XTRA_PRINTLN2("Pressed button medium");
+    return ButtonMedium;
+  }
+
+  XTRA_PRINT2("Pressed button short ");
+  XTRA_PRINTLN2(t);
+  return ButtonShort;
 }
