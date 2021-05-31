@@ -75,5 +75,10 @@ class ESPXtra
        Return 0 on success.
     */
     int PostJsonString(const String& url, const char *header, const char *jsonStr);
+
+    /* Check if it time to do periodic work. Call from loop function.
+       millisBetweenWork: How often this function will return true.
+    */
+    bool TimeToWork(unsigned long millisBetweenWork);
 };
 #endif // ESPXTRA_H

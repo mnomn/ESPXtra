@@ -124,6 +124,7 @@ int ESPXtra::ButtonPressed(int buttonPin, int ledPin, int releasedState)
   if (start_press == 0) {
     XTRA_PRINTF("Pressed button %d\n", buttonPin);
     start_press = now;
+    if (ledPin >= 0) pinMode(ledPin, OUTPUT);
   }
 
   unsigned long t = now - start_press;
@@ -153,4 +154,17 @@ int ESPXtra::ButtonPressed(int buttonPin, int ledPin, int releasedState)
   XTRA_PRINT2("Pressed button short ");
   XTRA_PRINTLN2(t);
   return ButtonShort;
+}
+
+bool ESPXtra::TimeToWork(unsigned long millisBetweenWork)
+{
+  static unsigned long prev_work = 0;
+
+  if (millis() - prev_work > millisBetweenWork)
+  {
+    prev_work += millisBetweenWork;
+    return true;
+  }
+
+  return false;
 }
