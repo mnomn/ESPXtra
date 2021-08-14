@@ -5,7 +5,9 @@
 #define COOL_KEY_BEGIN 0x42454749
 #define COOL_KEY_END 0x454E4421
 
-#define min_per_h 60
+#define TIME_BUTTON_MEDIUM 2000UL
+#define TIME_BUTTON_LONG 6000UL
+
 struct RtcData_t
 {
   uint32_t keyBegin;
@@ -63,7 +65,7 @@ int ESPXtra::SleepCheck()
       ESP.rtcUserMemoryWrite(0, (uint32_t *)&rtcData, sizeof(RtcData_t));
       
       XTRA_PRINTLN2("Go back to sleep");
-      ESP.deepSleep(min_per_h * 60UL * 1000000UL,
+      ESP.deepSleep(60UL * 60UL * 1000000UL,
                     rtcData.hours ? WAKE_RF_DISABLED : WAKE_RF_DEFAULT);
     }
   }
@@ -77,14 +79,14 @@ int ESPXtra::SleepCheck()
 void ESPXtra::SleepSetMinutes(uint32_t sleepMinutes)
 {
   RtcData_t rtcData;
-  rtcData.hours = sleepMinutes / min_per_h;
-  sleepMinutes = sleepMinutes % min_per_h;
+  rtcData.hours = sleepMinutes / 60;
+  sleepMinutes = sleepMinutes % 60;
 
   /* Sleep 0 minutes will not wake up, so prevent that here when
      even number of hours */
   if (sleepMinutes == 0 && rtcData.hours > 0)
   {
-    sleepMinutes = min_per_h;
+    sleepMinutes = 60;
     rtcData.hours--;
   }
 
@@ -108,52 +110,46 @@ void ESPXtra::SleepSetMinutes(uint32_t sleepMinutes)
 
 int ESPXtra::ButtonPressed(int buttonPin, int ledPin, int releasedState)
 {
-  static unsigned long start_press = 0;
-  int pin_state = digitalRead(buttonPin);
-
-  if (pin_state == releasedState) {
-    if (start_press) {
-      XTRA_PRINTLN("Released button");
-    }
-    start_press = 0;
-    return 0;
+  if (digitalRead(buttonPin) == releasedState) {
+    return ButtonNotPressed;
   }
 
-  unsigned long now = millis();
+  XTRA_PRINTLN("Button pressed");
+  unsigned long start_press = millis();
 
-  if (start_press == 0) {
-    XTRA_PRINTF("Pressed button %d\n", buttonPin);
-    start_press = now;
-    if (ledPin >= 0) pinMode(ledPin, OUTPUT);
-  }
+  // Button pressed, block until release and return how long it was pressed
+  while(1) {
+    unsigned long now = millis();
 
-  unsigned long t = now - start_press;
-
-  if (t > 6000)
-  {
-    if (ledPin >= 0)
-    {
+    // Calculate how long button has been pressed, and blink
+    unsigned long t = now - start_press;
+    int buttonTime = ButtonShort;
+    if (t > TIME_BUTTON_LONG) {
+      if (buttonTime != ButtonLong) {
+        buttonTime = ButtonLong;
+        XTRA_PRINTLN("Button long");
+      }
       // slow blink
-      digitalWrite(ledPin, (now / 500) & 1);
+      if (ledPin > 0) digitalWrite(ledPin, (now / 500) & 1);
     }
-    XTRA_PRINTLN2("Pressed button long");
-    return ButtonLong;
-  }
-
-  if (t > 2000)
-  {
-    if (ledPin >= 0)
-    {
+    else if (t > TIME_BUTTON_MEDIUM) {
+      if (buttonTime != ButtonMedium) {
+        buttonTime = ButtonMedium;
+        XTRA_PRINTLN("Button medium");
+      }
       // Fast blink
-      digitalWrite(ledPin, (now / 100) & 1);
+      if (ledPin > 0) digitalWrite(ledPin, (now / 100) & 1);
     }
-    XTRA_PRINTLN2("Pressed button medium");
-    return ButtonMedium;
-  }
 
-  XTRA_PRINT2("Pressed button short ");
-  XTRA_PRINTLN2(t);
-  return ButtonShort;
+    // Button released, return.
+    int pin_state = digitalRead(buttonPin);
+    if (pin_state == releasedState) {
+      XTRA_PRINTLN("Button released");
+      return buttonTime;
+    }
+
+    delay(10); // Buttton not released, wait and check again
+  }
 }
 
 bool ESPXtra::TimeToWork(unsigned long millisBetweenWork)

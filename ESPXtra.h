@@ -59,13 +59,12 @@ class ESPXtra
     */
     void SleepSetMinutes(uint32_t minutes);
 
-    /* Check if a button is pressed, short, medium (> 2 sec) or long (> 6 sec) pressed.
-       Optionally blink a led to show when button presed medium (medium blinks) or long (long blinks).
-       Only one button at the time can be checked for longpress.
+    /* Check if a button is pressed and for how long. Function blocks until button is released.
+       Optionally blink a led to show when button pressed medium (medium blinks) or long (long blinks).
        buttonPin: Which gpio pin to check
-       ledPin: Which pin the indicator led is connected to (or -1).
-       releasedState: (optional, default HIGH). Set LOW if pin is normally low.
-       Returns ButtonNotPressed (0), ButtonSort, ButtonMedium, ButtonLong.
+       ledPin: Which pin the indicator led is connected to (or -1 to disable)
+       releasedState: Which mode does the unpressed pin have, HIGH or LOW
+       Returns ButtonNotPressed (0), ButtonSort, ButtonMedium (> 2 sec), ButtonLong (> 6 sec).
     */
     int ButtonPressed(int buttonPin, int ledPin = -1, int releasedState = HIGH);
 
