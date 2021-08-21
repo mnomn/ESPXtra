@@ -116,6 +116,7 @@ int ESPXtra::ButtonPressed(int buttonPin, int ledPin, int releasedState)
 
   XTRA_PRINTLN("Button pressed");
   unsigned long start_press = millis();
+  int buttonTime = ButtonShort;
 
   // Button pressed, block until release and return how long it was pressed
   while(1) {
@@ -123,22 +124,23 @@ int ESPXtra::ButtonPressed(int buttonPin, int ledPin, int releasedState)
 
     // Calculate how long button has been pressed, and blink
     unsigned long t = now - start_press;
-    int buttonTime = ButtonShort;
-    if (t > TIME_BUTTON_LONG) {
-      if (buttonTime != ButtonLong) {
-        buttonTime = ButtonLong;
-        XTRA_PRINTLN("Button long");
+
+    if (t > TIME_BUTTON_MEDIUM) {
+      if (t > TIME_BUTTON_LONG) {
+        if (buttonTime != ButtonLong) {
+          buttonTime = ButtonLong;
+          XTRA_PRINTLN("Button long");
+        }
+        // slow blink
+        if (ledPin > 0) digitalWrite(ledPin, (now / 500) & 1);
+      } else {
+        if (buttonTime != ButtonMedium) {
+          buttonTime = ButtonMedium;
+          XTRA_PRINTLN("Button medium..");
+        }
+        // Medium blink
+        if (ledPin > 0) digitalWrite(ledPin, (now / 100) & 1);
       }
-      // slow blink
-      if (ledPin > 0) digitalWrite(ledPin, (now / 500) & 1);
-    }
-    else if (t > TIME_BUTTON_MEDIUM) {
-      if (buttonTime != ButtonMedium) {
-        buttonTime = ButtonMedium;
-        XTRA_PRINTLN("Button medium");
-      }
-      // Fast blink
-      if (ledPin > 0) digitalWrite(ledPin, (now / 100) & 1);
     }
 
     // Button released, return.
