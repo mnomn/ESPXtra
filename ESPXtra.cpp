@@ -19,9 +19,8 @@ ESPXtra::ESPXtra()
 {
 }
 
-int ESPXtra::PostJsonString(const String& url, const char *header, const char *jsonStr)
+int ESPXtra::PostJsonString(const String& url, const char *jsonStr, const char *header)
 {
-  String jdata;
   WiFiClient client;
   HTTPClient http;
 
@@ -35,6 +34,21 @@ int ESPXtra::PostJsonString(const String& url, const char *header, const char *j
   }
 
   http.addHeader("Content-Type", "application/json");
+
+  // Add optional extra header
+  if (header) {
+    char* val = strchr(header, ':');
+    if (val) {
+      int len = val - header;
+      if (len < 32) {
+        char key[len+1];
+        strncpy(key, header, len);
+        val++;
+        http.addHeader(key, val);
+      }
+    }
+  }
+
   int retCode = http.POST(jsonStr);
   XTRA_PRINTF("Return code: %d\n", retCode);
 
@@ -156,11 +170,11 @@ int ESPXtra::ButtonPressed(int buttonPin, int ledPin, int releasedState)
 
 bool ESPXtra::TimeToWork(unsigned long millisBetweenWork)
 {
-  static unsigned long prev_work = 0;
+  static unsigned long prevWork = 0;
 
-  if (millis() - prev_work > millisBetweenWork)
+  if (millis() - prevWork > millisBetweenWork)
   {
-    prev_work += millisBetweenWork;
+    prevWork += millisBetweenWork;
     return true;
   }
 

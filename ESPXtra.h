@@ -73,7 +73,7 @@ class ESPXtra
        PostJsonString("http://www.example.com:8080/some/path", "secret-key:1234", "{\"val1\":123,\"val2\":321.0}");
        Return 0 on success.
     */
-    int PostJsonString(const String& url, const char *header, const char *jsonStr);
+    int PostJsonString(const String& url, const char *jsonStr, const char *header = NULL);
 
     /* Check if it time to do periodic work. Call from loop function.
        millisBetweenWork: How often this function will return true.

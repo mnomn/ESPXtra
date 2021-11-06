@@ -16,8 +16,8 @@ A small resistor (220 ohm) between GPIO 16 and RESET will make both flashing and
 Call `p = ButtonPressed(pin)` to detect a button press. Returns after the button is released, and also returns for how long the button was pressed: short, medium or long.
 
 ## PostJson
-Post up to 5 values in json format to a url.
+Post json string. Possible to add an extra header.
 ```
-PostJson("192.168.0.12", 8080, NULL, "value1", 34.56);
-PostJson("www.example.com", 80, "secret-key:1234", "value1", 34.56, "value2", 98.65);
+PostJson("192.168.0.12", "{\"value1\": 34.56}", NULL);
+PostJson("www.example.com", {\"value1\": 34.56, \"value2\": 98.65}, "secret-key:1234");
 ```
